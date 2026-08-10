@@ -1,0 +1,20 @@
+# Ignore everything in the root directory
+/*
+
+# Do not ignore the BibliotecaBlazor folder and .gitignore itself
+!/BibliotecaBlazor/
+!/.gitignore
+
+# Ignore build, temporary, and user settings files inside BibliotecaBlazor
+BibliotecaBlazor/[Bb]in/
+BibliotecaBlazor/[Oo]bj/
+BibliotecaBlazor/.vs/
+BibliotecaBlazor/*.user
+BibliotecaBlazor/*.suo
+BibliotecaBlazor/*.userosscache
+BibliotecaBlazor/*.sln.docstates
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini

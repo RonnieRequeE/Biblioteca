@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+
+<div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <header style="border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="margin: 0; color: #333;">SISTEMA DE BIBLIOTECA</h1>
+        <nav style="display: flex; gap: 15px;">
+            <a href="/" style="text-decoration: none; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; color: #000; font-weight: bold;">Libros</a>
+            <a href="/autores" style="text-decoration: none; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; color: #000; font-weight: bold;">Autores</a>
+            <a href="/categorias" style="text-decoration: none; padding: 8px 16px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; color: #000; font-weight: bold;">Categorías</a>
+        </nav>
+    </header>
+
+    <main>
+        @Body
+    </main>
+
+    <footer style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #ccc; text-align: center; font-size: 0.9em; color: #666;">
+        &copy; 2026 - Proyecto Académico - Base de Datos II (MongoDB + Blazor)
+    </footer>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet style="display:none;">
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+

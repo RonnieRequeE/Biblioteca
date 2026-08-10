@@ -1,0 +1,275 @@
+@page "/categorias"
+@inject CategoriaService CategoriaService
+
+<h3>GESTIÓN DE CATEGORÍAS</h3>
+
+<!-- Sección de búsqueda y filtros -->
+<div style="background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 4px;">
+    <h4 style="margin-top: 0;">Filtros y Búsqueda</h4>
+    <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Buscar por nombre:</label>
+            <input type="text" @bind="textoBusqueda" placeholder="Escriba nombre..." style="padding: 6px; width: 200px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Estado:</label>
+            <select @bind="filtroEstado" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="Todos">Todos</option>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Área:</label>
+            <select @bind="filtroArea" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="Todas">Todas</option>
+                @foreach (var ar in areas)
+                {
+                    <option value="@ar">@ar</option>
+                }
+            </select>
+        </div>
+        <div>
+            <button @onclick="AplicarFiltros" style="padding: 7px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Buscar / Filtrar</button>
+            <button @onclick="LimpiarFiltros" style="padding: 7px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px;">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+<button @onclick="MostrarCrearForm" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 15px;">+ Nueva Categoría</button>
+
+<!-- Formulario para Crear / Editar -->
+@if (mostrarFormulario)
+{
+    <div style="background-color: #fff; padding: 20px; border: 2px solid #333; margin-bottom: 20px; border-radius: 6px; max-width: 500px;">
+        <h4>@(categoriaForm.Id == null ? "CREAR NUEVA CATEGORÍA" : "EDITAR CATEGORÍA")</h4>
+        
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div style="color: red; font-weight: bold; margin-bottom: 10px;">@mensajeError</div>
+        }
+
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Nombre:</label>
+            <input type="text" @bind="categoriaForm.Nombre" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Descripción:</label>
+            <input type="text" @bind="categoriaForm.Descripcion" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Área:</label>
+            <input type="text" @bind="categoriaForm.Area" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Nivel:</label>
+            <input type="text" @bind="categoriaForm.Nivel" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Fecha de Creación:</label>
+            <input type="date" @bind="categoriaForm.FechaCreacion" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; font-weight: bold;">Responsable:</label>
+            <input type="text" @bind="categoriaForm.Responsable" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;" />
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold;">Estado:</label>
+            <select @bind="categoriaForm.Estado" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+
+        <button @onclick="GuardarCategoria" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Guardar</button>
+        <button @onclick="CancelarFormulario" style="padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px;">Cancelar</button>
+    </div>
+}
+
+<!-- Tabla de Registros -->
+<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+    <thead>
+        <tr style="background-color: #f2f2f2; border-bottom: 2px solid #ddd;">
+            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Nombre</th>
+            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Descripción</th>
+            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Área</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Nivel</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">F. Creación</th>
+            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Responsable</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Estado</th>
+            <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (categoriasFiltradas.Count == 0)
+        {
+            <tr>
+                <td colspan="8" style="padding: 15px; text-align: center; color: #777;">No se encontraron categorías.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var cat in categoriasFiltradas)
+            {
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 10px; border: 1px solid #ddd;">@cat.Nombre</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">@cat.Descripcion</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">@cat.Area</td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">@cat.Nivel</td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">@(cat.FechaCreacion?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">@cat.Responsable</td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">
+                        <span style="padding: 3px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold; background-color: @(cat.Estado == "Activo" ? "#d4edda" : "#f8d7da"); color: @(cat.Estado == "Activo" ? "#155724" : "#721c24");">
+                            @cat.Estado
+                        </span>
+                    </td>
+                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">
+                        <button @onclick="() => MostrarEditarForm(cat)" style="padding: 4px 8px; background-color: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px;">Editar</button>
+                        @if (cat.Estado == "Activo")
+                        {
+                            <button @onclick="() => EliminarLogico(cat.Id)" style="padding: 4px 8px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Categoria> categorias = new();
+    private List<Categoria> categoriasFiltradas = new();
+    private List<string> areas = new();
+
+    // Filtros
+    private string textoBusqueda = "";
+    private string filtroEstado = "Todos";
+    private string filtroArea = "Todas";
+
+    // Formulario
+    private bool mostrarFormulario = false;
+    private Categoria categoriaForm = new();
+    private string mensajeError = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        categorias = await CategoriaService.GetAsync();
+        
+        // Obtener lista única de áreas para el filtro
+        var listaAreas = new HashSet<string>();
+        foreach (var cat in categorias)
+        {
+            if (!string.IsNullOrWhiteSpace(cat.Area))
+            {
+                listaAreas.Add(cat.Area);
+            }
+        }
+        areas = listaAreas.ToList();
+
+        AplicarFiltros();
+    }
+
+    private void AplicarFiltros()
+    {
+        categoriasFiltradas = categorias;
+
+        // Búsqueda por texto (Nombre)
+        if (!string.IsNullOrWhiteSpace(textoBusqueda))
+        {
+            categoriasFiltradas = categoriasFiltradas.FindAll(c => c.Nombre.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Filtro por Estado
+        if (filtroEstado != "Todos")
+        {
+            categoriasFiltradas = categoriasFiltradas.FindAll(c => c.Estado == filtroEstado);
+        }
+
+        // Filtro por Área
+        if (filtroArea != "Todas")
+        {
+            categoriasFiltradas = categoriasFiltradas.FindAll(c => c.Area == filtroArea);
+        }
+    }
+
+    private void LimpiarFiltros()
+    {
+        textoBusqueda = "";
+        filtroEstado = "Todos";
+        filtroArea = "Todas";
+        AplicarFiltros();
+    }
+
+    private void MostrarCrearForm()
+    {
+        categoriaForm = new Categoria
+        {
+            FechaCreacion = DateTime.Today,
+            Estado = "Activo"
+        };
+        mensajeError = "";
+        mostrarFormulario = true;
+    }
+
+    private void MostrarEditarForm(Categoria cat)
+    {
+        categoriaForm = new Categoria
+        {
+            Id = cat.Id,
+            Nombre = cat.Nombre,
+            Descripcion = cat.Descripcion,
+            Area = cat.Area,
+            Nivel = cat.Nivel,
+            FechaCreacion = cat.FechaCreacion,
+            Responsable = cat.Responsable,
+            Estado = cat.Estado
+        };
+        mensajeError = "";
+        mostrarFormulario = true;
+    }
+
+    private void CancelarFormulario()
+    {
+        mostrarFormulario = false;
+        mensajeError = "";
+    }
+
+    private async Task GuardarCategoria()
+    {
+        if (string.IsNullOrWhiteSpace(categoriaForm.Nombre) || 
+            string.IsNullOrWhiteSpace(categoriaForm.Descripcion) || 
+            string.IsNullOrWhiteSpace(categoriaForm.Area) ||
+            string.IsNullOrWhiteSpace(categoriaForm.Nivel) ||
+            string.IsNullOrWhiteSpace(categoriaForm.Responsable))
+        {
+            mensajeError = "Todos los campos son obligatorios.";
+            return;
+        }
+
+        if (categoriaForm.Id == null)
+        {
+            await CategoriaService.CreateAsync(categoriaForm);
+        }
+        else
+        {
+            await CategoriaService.UpdateAsync(categoriaForm.Id, categoriaForm);
+        }
+
+        mostrarFormulario = false;
+        await CargarDatos();
+    }
+
+    private async Task EliminarLogico(string id)
+    {
+        if (id != null)
+        {
+            await CategoriaService.DeleteLogicAsync(id);
+            await CargarDatos();
+        }
+    }
+}
